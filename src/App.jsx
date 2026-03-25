@@ -7,7 +7,6 @@ import SmartTimingAdvisor from "./components/SmartTimingAdvisor";
 import Stats from "./components/Stats";
 import { useApplications } from "./hooks/useApplications";
 import { useGhostDetection } from "./hooks/useGhostDetection";
-import { generateFollowUpEmail } from "./services/openai";
 import { getGhostScore } from "./utils/ghostScore";
 import { baseStyles } from "./styles/theme";
 import ApplicationForm from "./components/ApplicationForm";
@@ -56,6 +55,34 @@ function matchesFilter(app, ghostBand, filter) {
   if (filter === "cold") return ghostBand === "cold" || ghostBand === "warming";
   if (filter === "fresh") return ghostBand === "fresh";
   return true;
+}
+
+function generateFollowUpDraft(application, ghostMeta) {
+  const company = application?.company || "the company";
+  const role = application?.role || "the role";
+  const recruiterContact = application?.recruiterContact || "";
+  const recruiterName = recruiterContact.includes("@")
+    ? recruiterContact.split("@")[0]
+    : recruiterContact;
+  const greeting = recruiterName ? `Hi ${recruiterName},` : "Hi Hiring Team,";
+  const scoreReason = ghostMeta?.scoreReason
+    ? ghostMeta.scoreReason
+    : ghostMeta?.daysSinceLastActivity
+      ? `It has been ${ghostMeta.daysSinceLastActivity} day(s) since the last update.`
+      : "I wanted to check in on the status of my application.";
+
+  return `Subject: Following up on my ${role} application
+
+${greeting}
+
+I hope you're doing well. I wanted to follow up on my application for the ${role} role at ${company}.
+
+I'm still very interested in the opportunity and wanted to check whether there have been any updates on the hiring process. ${scoreReason}
+
+Please let me know if there is any additional information I can provide.
+
+Best regards,
+[Your Name]`;
 }
 
 export default function App() {
@@ -138,17 +165,20 @@ export default function App() {
     if (!application) return;
 
     setEmailModal((prev) => ({ ...prev, loading: true, error: "" }));
+
     try {
-      const body = await generateFollowUpEmail(
-        application,
-        ghostMetas[application.id],
-      );
-      setEmailModal((prev) => ({ ...prev, emailBody: body, loading: false }));
+      const body = generateFollowUpDraft(application, ghostMetas[application.id]);
+
+      setEmailModal((prev) => ({
+        ...prev,
+        emailBody: body,
+        loading: false,
+      }));
     } catch (error) {
       setEmailModal((prev) => ({
         ...prev,
         loading: false,
-        error: error.message,
+        error: error?.message || "Failed to generate follow-up email.",
       }));
     }
   };
