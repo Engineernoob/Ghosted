@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import AddApplicationModal from "./components/AddApplicationModal";
 import CompanyResearchCard from "./components/CompanyResearchCard";
 import Dashboard from "./components/Dashboard";
