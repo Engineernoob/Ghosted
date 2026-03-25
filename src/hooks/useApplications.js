@@ -6,6 +6,12 @@ const STORAGE_KEY = 'ghosted.applications.v1';
 const buildSeedData = () => [
   {
     id: makeId(),
+
+const STORAGE_KEY = 'ghosted.applications.v1';
+
+const seedData = [
+  {
+    id: crypto.randomUUID(),
     company: 'Vercel',
     companyDomain: 'vercel.com',
     role: 'Frontend Engineer Intern',
@@ -17,6 +23,7 @@ const buildSeedData = () => [
   },
   {
     id: makeId(),
+    id: crypto.randomUUID(),
     company: 'Stripe',
     companyDomain: 'stripe.com',
     role: 'Software Engineer New Grad',
@@ -54,6 +61,16 @@ export function useApplications() {
     } catch {
       // storage quota/full privacy mode can block writes; keep app usable
     }
+    const saved = localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      setApplications(JSON.parse(saved));
+    } else {
+      setApplications(seedData);
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
   }, [applications]);
 
   const addApplication = useCallback((application) => {
@@ -61,6 +78,7 @@ export function useApplications() {
       {
         ...application,
         id: makeId()
+        id: crypto.randomUUID()
       },
       ...prev
     ]);

@@ -35,6 +35,15 @@ async function chat(messages, temperature = 0.7) {
     throw new Error('Missing VITE_OPENAI_API_KEY. Add it to your .env file to enable AI features.');
   }
 
+export async function generateFollowUpEmail(application, ghostMeta) {
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+  if (!apiKey) {
+    throw new Error('Missing VITE_OPENAI_API_KEY. Add it to your .env file to enable AI email generation.');
+  }
+
+  const userPrompt = `Context:\n- Company: ${application.company}\n- Role: ${application.role}\n- Days since applied: ${ghostMeta.daysSinceApplied}\n- Days since last activity: ${ghostMeta.daysSinceLastActivity}\n- Current status: ${application.status}\n- Notes: ${application.notes || 'N/A'}\n- Preferred tone: ${getToneHint(ghostMeta.ghostProbability)}`;
+
   const response = await fetch('https://api.openai.com/v1/chat/completions', {
     method: 'POST',
     headers: {
@@ -46,6 +55,12 @@ async function chat(messages, temperature = 0.7) {
       messages,
       max_tokens: 400,
       temperature
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userPrompt }
+      ],
+      max_tokens: 300,
+      temperature: 0.7
     })
   });
 
@@ -79,4 +94,5 @@ export async function generateInterviewPrep(application, ghostMeta) {
     ],
     0.6
   );
+  return data.choices?.[0]?.message?.content?.trim() || 'Unable to generate email right now.';
 }
