@@ -1,3 +1,10 @@
+import { useEffect, useMemo, useState } from 'react';
+import AddApplicationModal from './components/AddApplicationModal';
+import CompanyResearchCard from './components/CompanyResearchCard';
+import Dashboard from './components/Dashboard';
+import EmailModal from './components/EmailModal';
+import InterviewPrepGenerator from './components/InterviewPrepGenerator';
+import SmartTimingAdvisor from './components/SmartTimingAdvisor';
 import { useMemo, useState } from 'react';
 import AddApplicationModal from './components/AddApplicationModal';
 import Dashboard from './components/Dashboard';
@@ -9,6 +16,7 @@ import { generateFollowUpEmail } from './services/openai';
 import { baseStyles } from './styles/theme';
 
 const shellStyles = `
+.app-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 3rem; }
 .app-shell { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 3rem; }
 .brand { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; }
 .brand h1 { margin: 0; font-size: 1.8rem; }
@@ -39,6 +47,9 @@ const shellStyles = `
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
 .form-grid textarea, .form-grid label { grid-column: 1 / -1; color: var(--text-secondary); display: grid; gap: 0.25rem; font-size: 14px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 0.6rem; margin-top: 1rem; }
+.dashboard-grid { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1rem; align-items: start; }
+.side-rail { display: grid; gap: 0.8rem; }
+@media (max-width: 980px) { .dashboard-grid { grid-template-columns: 1fr; } }
 @media (max-width: 720px) { .form-grid { grid-template-columns: 1fr; } }
 `;
 
@@ -57,6 +68,7 @@ export default function App() {
 
   const [filter, setFilter] = useState('all');
   const [isAddOpen, setIsAddOpen] = useState(false);
+  const [focusedApplicationId, setFocusedApplicationId] = useState(null);
   const [emailModal, setEmailModal] = useState({ application: null, loading: false, error: '', emailBody: '' });
 
   const ghostMetas = useMemo(
@@ -67,6 +79,22 @@ export default function App() {
   const filteredApps = useMemo(
     () => applications.filter((app) => matchesFilter(app, ghostMetas[app.id]?.ghostBand, filter)),
     [applications, filter, ghostMetas]
+  );
+
+  useEffect(() => {
+    if (!filteredApps.length) {
+      setFocusedApplicationId(null);
+      return;
+    }
+
+    if (!filteredApps.some((app) => app.id === focusedApplicationId)) {
+      setFocusedApplicationId(filteredApps[0].id);
+    }
+  }, [filteredApps, focusedApplicationId]);
+
+  const focusedApplication = useMemo(
+    () => applications.find((app) => app.id === focusedApplicationId) || filteredApps[0] || null,
+    [applications, filteredApps, focusedApplicationId]
   );
 
   const stats = useMemo(() => {
@@ -99,6 +127,7 @@ export default function App() {
         <header className="brand">
           <div>
             <h1>Ghosted 👻</h1>
+            <p>Track applications, spot ghosting early, and ship the right follow-up at the right time.</p>
             <p>Track applications, spot ghosting early, and send polished follow-ups.</p>
           </div>
           <button type="button" className="primary-btn" onClick={() => setIsAddOpen(true)}>+ Add Application</button>
@@ -106,16 +135,26 @@ export default function App() {
 
         <Stats stats={stats} />
 
+        <div style={{ marginTop: '1rem' }} className="dashboard-grid">
         <div style={{ marginTop: '1rem' }}>
           <Dashboard
             applications={filteredApps}
             ghostMetas={ghostMetas}
             filter={filter}
+            focusedApplicationId={focusedApplication?.id}
+            onFilterChange={setFilter}
+            onFocus={setFocusedApplicationId}
             onFilterChange={setFilter}
             onOpenEmail={(application) => setEmailModal({ application, loading: false, error: '', emailBody: '' })}
             onStatusChange={(id, status) => updateApplication(id, { status, lastActivityDate: new Date().toISOString().slice(0, 10) })}
             onDelete={deleteApplication}
           />
+
+          <aside className="side-rail">
+            <CompanyResearchCard application={focusedApplication} />
+            <SmartTimingAdvisor application={focusedApplication} ghostMeta={focusedApplication ? ghostMetas[focusedApplication.id] : null} />
+            <InterviewPrepGenerator application={focusedApplication} ghostMeta={focusedApplication ? ghostMetas[focusedApplication.id] : null} />
+          </aside>
         </div>
       </main>
 

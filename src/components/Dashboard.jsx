@@ -1,5 +1,16 @@
 import ApplicationCard from './ApplicationCard';
 
+export default function Dashboard({
+  applications,
+  ghostMetas,
+  filter,
+  focusedApplicationId,
+  onFilterChange,
+  onFocus,
+  onOpenEmail,
+  onStatusChange,
+  onDelete
+}) {
 export default function Dashboard({ applications, ghostMetas, filter, onFilterChange, onOpenEmail, onStatusChange, onDelete }) {
   return (
     <section>
@@ -22,6 +33,8 @@ export default function Dashboard({ applications, ghostMetas, filter, onFilterCh
             key={application.id}
             application={application}
             ghostMeta={ghostMetas[application.id]}
+            isActive={focusedApplicationId === application.id}
+            onSelect={() => onFocus(application.id)}
             onOpenEmail={() => onOpenEmail(application)}
             onStatusChange={(status) => onStatusChange(application.id, status)}
             onDelete={() => onDelete(application.id)}

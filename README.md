@@ -8,6 +8,9 @@ Ghosted is a React demo app for tracking job applications, estimating ghost prob
 - Ghost detection algorithm with status-aware thresholds
 - Filterable dashboard with stats and ghost-o-meter
 - AI follow-up email generator via OpenAI Chat Completions
+- **Interview Prep Generator** for company/role-specific interview briefs
+- **Company Research Card** that fetches public context for the selected target company
+- **Smart Timing Advisor** to recommend when to send follow-ups based on ghost risk
 - Dark themed UI with animated cards and gradient accents
 
 ## Quick Start
@@ -27,12 +30,15 @@ Create a `.env` file:
 VITE_OPENAI_API_KEY=your_openai_api_key
 ```
 
+If missing, AI actions will show a helpful error when triggered.
 If missing, the app will show a helpful error when you try to generate an email.
 
 ## Project Structure
 
 - `src/hooks/useApplications.js` — localStorage CRUD state
 - `src/hooks/useGhostDetection.js` — ghost probability logic
+- `src/services/openai.js` — OpenAI integration for follow-up + prep generation
+- `src/components/*` — dashboard, cards, advisor, and modal UI components
 - `src/services/openai.js` — OpenAI integration
 - `src/components/*` — dashboard and modal UI components
 - `src/styles/theme.js` — CSS variables and theme constants

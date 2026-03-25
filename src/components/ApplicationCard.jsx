@@ -13,6 +13,11 @@ const probabilityColors = {
   ghosted: 'var(--ghosted)'
 };
 
+export default function ApplicationCard({ application, ghostMeta, isActive, onSelect, onOpenEmail, onStatusChange, onDelete }) {
+  const logoUrl = application.companyDomain ? `https://logo.clearbit.com/${application.companyDomain}` : null;
+
+  return (
+    <article className="app-card" onClick={onSelect} style={{ borderColor: isActive ? '#6366f1' : undefined }}>
 export default function ApplicationCard({ application, ghostMeta, onOpenEmail, onStatusChange, onDelete }) {
   const logoUrl = application.companyDomain ? `https://logo.clearbit.com/${application.companyDomain}` : null;
 
@@ -39,6 +44,7 @@ export default function ApplicationCard({ application, ghostMeta, onOpenEmail, o
           <span>{ghostMeta.ghostProbability}%</span>
         </div>
         <div className="meter-track">
+          <div className="meter-fill" style={{ width: `${ghostMeta.ghostProbability}%`, background: probabilityColors[ghostMeta.ghostBand] }} />
           <div
             className="meter-fill"
             style={{ width: `${ghostMeta.ghostProbability}%`, background: probabilityColors[ghostMeta.ghostBand] }}
@@ -50,6 +56,7 @@ export default function ApplicationCard({ application, ghostMeta, onOpenEmail, o
         Last activity: <strong style={{ color: 'var(--text-primary)' }}>{ghostMeta.daysSinceLastActivity} days ago</strong>
       </p>
 
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} onClick={(e) => e.stopPropagation()}>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {ghostMeta.ghostProbability > 25 && (
           <button type="button" className="primary-btn" onClick={onOpenEmail}>Generate Follow-up</button>
