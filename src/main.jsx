@@ -34,8 +34,5 @@ createRoot(document.getElementById('root')).render(
     <ErrorBoundary>
       <App />
     </ErrorBoundary>
-createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
   </React.StrictMode>
 );
