@@ -11,6 +11,7 @@ export default function Dashboard({
   onStatusChange,
   onDelete
 }) {
+export default function Dashboard({ applications, ghostMetas, filter, onFilterChange, onOpenEmail, onStatusChange, onDelete }) {
   return (
     <section>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
@@ -46,6 +47,20 @@ export default function Dashboard({
           ))}
         </div>
       )}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 12 }}>
+        {applications.map((application) => (
+          <ApplicationCard
+            key={application.id}
+            application={application}
+            ghostMeta={ghostMetas[application.id]}
+            isActive={focusedApplicationId === application.id}
+            onSelect={() => onFocus(application.id)}
+            onOpenEmail={() => onOpenEmail(application)}
+            onStatusChange={(status) => onStatusChange(application.id, status)}
+            onDelete={() => onDelete(application.id)}
+          />
+        ))}
+      </div>
     </section>
   );
 }
