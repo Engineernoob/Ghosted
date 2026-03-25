@@ -13,6 +13,7 @@ import { baseStyles } from './styles/theme';
 
 const shellStyles = `
 .app-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 3rem; }
+.app-shell { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 3rem; }
 .brand { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; }
 .brand h1 { margin: 0; font-size: 1.8rem; }
 .brand p { margin: 0.3rem 0 0; color: var(--text-secondary); }
@@ -123,6 +124,7 @@ export default function App() {
           <div>
             <h1>Ghosted 👻</h1>
             <p>Track applications, spot ghosting early, and ship the right follow-up at the right time.</p>
+            <p>Track applications, spot ghosting early, and send polished follow-ups.</p>
           </div>
           <button type="button" className="primary-btn" onClick={() => setIsAddOpen(true)}>+ Add Application</button>
         </header>
@@ -130,6 +132,7 @@ export default function App() {
         <Stats stats={stats} />
 
         <div style={{ marginTop: '1rem' }} className="dashboard-grid">
+        <div style={{ marginTop: '1rem' }}>
           <Dashboard
             applications={filteredApps}
             ghostMetas={ghostMetas}
@@ -137,6 +140,7 @@ export default function App() {
             focusedApplicationId={focusedApplication?.id}
             onFilterChange={setFilter}
             onFocus={setFocusedApplicationId}
+            onFilterChange={setFilter}
             onOpenEmail={(application) => setEmailModal({ application, loading: false, error: '', emailBody: '' })}
             onStatusChange={(id, status) => updateApplication(id, { status, lastActivityDate: new Date().toISOString().slice(0, 10) })}
             onDelete={deleteApplication}

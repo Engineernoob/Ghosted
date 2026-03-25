@@ -18,6 +18,11 @@ export default function ApplicationCard({ application, ghostMeta, isActive, onSe
 
   return (
     <article className="app-card" onClick={onSelect} style={{ borderColor: isActive ? '#6366f1' : undefined }}>
+export default function ApplicationCard({ application, ghostMeta, onOpenEmail, onStatusChange, onDelete }) {
+  const logoUrl = application.companyDomain ? `https://logo.clearbit.com/${application.companyDomain}` : null;
+
+  return (
+    <article className="app-card">
       <header style={{ display: 'flex', gap: '0.8rem', alignItems: 'center' }}>
         {logoUrl ? (
           <img src={logoUrl} alt={`${application.company} logo`} style={{ width: 36, height: 36, borderRadius: 8, background: '#fff' }} />
@@ -40,6 +45,10 @@ export default function ApplicationCard({ application, ghostMeta, isActive, onSe
         </div>
         <div className="meter-track">
           <div className="meter-fill" style={{ width: `${ghostMeta.ghostProbability}%`, background: probabilityColors[ghostMeta.ghostBand] }} />
+          <div
+            className="meter-fill"
+            style={{ width: `${ghostMeta.ghostProbability}%`, background: probabilityColors[ghostMeta.ghostBand] }}
+          />
         </div>
       </div>
 
@@ -48,6 +57,7 @@ export default function ApplicationCard({ application, ghostMeta, isActive, onSe
       </p>
 
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }} onClick={(e) => e.stopPropagation()}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
         {ghostMeta.ghostProbability > 25 && (
           <button type="button" className="primary-btn" onClick={onOpenEmail}>Generate Follow-up</button>
         )}
