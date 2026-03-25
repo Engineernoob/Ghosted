@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from "react";
-import AddApplicationModal from "./components/AddApplicationModal";
 import CompanyResearchCard from "./components/CompanyResearchCard";
 import Dashboard from "./components/Dashboard";
 import EmailModal from "./components/EmailModal";
@@ -9,10 +8,11 @@ import Stats from "./components/Stats";
 import { useApplications } from "./hooks/useApplications";
 import { useGhostDetection } from "./hooks/useGhostDetection";
 import { generateFollowUpEmail } from "./services/openai";
+import { getGhostScore } from "./utils/ghostScore";
 import { baseStyles } from "./styles/theme";
+import ApplicationForm from "./components/ApplicationForm";
 
 const shellStyles = `
-.app-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 3rem; }
 .app-shell { max-width: 1100px; margin: 0 auto; padding: 2rem 1rem 3rem; }
 .brand { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.2rem; }
 .brand h1 { margin: 0; font-size: 1.8rem; }
@@ -76,7 +76,21 @@ export default function App() {
   const ghostMetas = useMemo(
     () =>
       Object.fromEntries(
-        applications.map((app) => [app.id, getGhostMeta(app)]),
+        applications.map((app) => {
+          const hookMeta = getGhostMeta(app);
+          const scoreMeta = getGhostScore(app);
+
+          return [
+            app.id,
+            {
+              ...hookMeta,
+              score: scoreMeta.risk,
+              scoreColor: scoreMeta.color,
+              scoreReason: scoreMeta.reason,
+              daysSinceContact: scoreMeta.daysSinceContact,
+            },
+          ];
+        }),
       ),
     [applications, getGhostMeta],
   );
@@ -147,12 +161,8 @@ export default function App() {
           <div>
             <h1>Ghosted 👻</h1>
             <p>
-              Track applications, spot ghosting early, and ship the right
-              follow-up at the right time.
-            </p>
-            <p>
               Track applications, spot ghosting early, and send polished
-              follow-ups.
+              follow-ups at the right time.
             </p>
           </div>
           <button
@@ -166,8 +176,7 @@ export default function App() {
 
         <Stats stats={stats} />
 
-        <div style={{ marginTop: "1rem" }} className="dashboard-grid" />
-        <div style={{ marginTop: "1rem" }}>
+        <div style={{ marginTop: "1rem" }} className="dashboard-grid">
           <Dashboard
             applications={filteredApps}
             ghostMetas={ghostMetas}
@@ -186,7 +195,7 @@ export default function App() {
             onStatusChange={(id, status) =>
               updateApplication(id, {
                 status,
-                lastActivityDate: new Date().toISOString().slice(0, 10),
+                lastContactDate: new Date().toISOString().slice(0, 10),
               })
             }
             onDelete={deleteApplication}
@@ -211,10 +220,14 @@ export default function App() {
       </main>
 
       {isAddOpen && (
-        <AddApplicationModal
-          onClose={() => setIsAddOpen(false)}
-          onAdd={addApplication}
-        />
+        <div className="modal-backdrop" onClick={() => setIsAddOpen(false)}>
+          <div className="modal-panel" onClick={(e) => e.stopPropagation()}>
+            <ApplicationForm
+              onAdd={addApplication}
+              onClose={() => setIsAddOpen(false)}
+            />
+          </div>
+        </div>
       )}
       {emailModal.application && (
         <EmailModal

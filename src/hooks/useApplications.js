@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { makeId } from "../utils/id";
 
 const STORAGE_KEY = "ghosted.applications.v1";
 
@@ -9,10 +8,10 @@ const seedData = [
     company: "Vercel",
     companyDomain: "vercel.com",
     role: "Frontend Engineer Intern",
-    dateApplied: new Date(Date.now() - 12 * 86400000)
+    appliedDate: new Date(Date.now() - 12 * 86400000)
       .toISOString()
       .slice(0, 10),
-    lastActivityDate: new Date(Date.now() - 8 * 86400000)
+    lastContactDate: new Date(Date.now() - 8 * 86400000)
       .toISOString()
       .slice(0, 10),
     status: "applied",
@@ -24,10 +23,10 @@ const seedData = [
     company: "Stripe",
     companyDomain: "stripe.com",
     role: "Software Engineer New Grad",
-    dateApplied: new Date(Date.now() - 20 * 86400000)
+    appliedDate: new Date(Date.now() - 20 * 86400000)
       .toISOString()
       .slice(0, 10),
-    lastActivityDate: new Date(Date.now() - 15 * 86400000)
+    lastContactDate: new Date(Date.now() - 15 * 86400000)
       .toISOString()
       .slice(0, 10),
     status: "interviewing",
@@ -36,7 +35,21 @@ const seedData = [
   },
 ];
 
-const buildSeedData = () => seedData;
+const normalizeApplication = (application) => {
+  const appliedDate = application.appliedDate || application.dateApplied || "";
+  const lastContactDate =
+    application.lastContactDate || application.lastActivityDate || appliedDate;
+
+  return {
+    ...application,
+    appliedDate,
+    dateApplied: appliedDate,
+    lastContactDate,
+    lastActivityDate: lastContactDate,
+  };
+};
+
+const buildSeedData = () => seedData.map(normalizeApplication);
 
 export function useApplications() {
   const [applications, setApplications] = useState([]);
@@ -47,7 +60,7 @@ export function useApplications() {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) {
-          setApplications(parsed);
+          setApplications(parsed.map(normalizeApplication));
           return;
         }
       }
@@ -64,17 +77,19 @@ export function useApplications() {
 
   const addApplication = useCallback((application) => {
     setApplications((prev) => [
-      {
+      normalizeApplication({
         ...application,
         id: crypto.randomUUID(),
-      },
+      }),
       ...prev,
     ]);
   }, []);
 
   const updateApplication = useCallback((id, updates) => {
     setApplications((prev) =>
-      prev.map((app) => (app.id === id ? { ...app, ...updates } : app)),
+      prev.map((app) =>
+        app.id === id ? normalizeApplication({ ...app, ...updates }) : app,
+      ),
     );
   }, []);
 

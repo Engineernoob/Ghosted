@@ -57,7 +57,7 @@ export default function Dashboard({
             <ApplicationCard
               key={application.id}
               application={application}
-              ghostMeta={ghostMetas[application.id]}
+              ghostMeta={ghostMetas?.[application.id] ?? {}}
               isActive={focusedApplicationId === application.id}
               onSelect={() => onFocus(application.id)}
               onOpenEmail={() => onOpenEmail(application)}

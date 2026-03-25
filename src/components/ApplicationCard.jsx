@@ -13,6 +13,12 @@ const probabilityColors = {
   ghosted: "var(--ghosted)",
 };
 
+function clampProbability(value) {
+  const numeric = Number(value);
+  if (Number.isNaN(numeric)) return 0;
+  return Math.max(0, Math.min(100, numeric));
+}
+
 export default function ApplicationCard({
   application,
   ghostMeta,
@@ -23,6 +29,11 @@ export default function ApplicationCard({
   const logoUrl = application.companyDomain
     ? `https://logo.clearbit.com/${application.companyDomain}`
     : null;
+
+  const ghostProbability = clampProbability(ghostMeta?.ghostProbability);
+  const ghostBand = ghostMeta?.ghostBand || "fresh";
+  const daysSinceLastActivity = ghostMeta?.daysSinceLastActivity ?? 0;
+  const statusColor = statusColors[application.status] || "#6b7280";
 
   return (
     <article className="app-card">
@@ -61,8 +72,8 @@ export default function ApplicationCard({
         <span
           className="status-badge"
           style={{
-            background: `${statusColors[application.status]}22`,
-            color: statusColors[application.status],
+            background: `${statusColor}22`,
+            color: statusColor,
           }}
         >
           {application.status}
@@ -79,21 +90,14 @@ export default function ApplicationCard({
           }}
         >
           <span>Ghost-o-meter</span>
-          <span>{ghostMeta.ghostProbability}%</span>
+          <span>{ghostProbability}%</span>
         </div>
         <div className="meter-track">
           <div
             className="meter-fill"
             style={{
-              width: `${ghostMeta.ghostProbability}%`,
-              background: probabilityColors[ghostMeta.ghostBand],
-            }}
-          />
-          <div
-            className="meter-fill"
-            style={{
-              width: `${ghostMeta.ghostProbability}%`,
-              background: probabilityColors[ghostMeta.ghostBand],
+              width: `${ghostProbability}%`,
+              background: probabilityColors[ghostBand] || "var(--fresh)",
             }}
           />
         </div>
@@ -102,12 +106,12 @@ export default function ApplicationCard({
       <p style={{ fontSize: 14, color: "var(--text-secondary)" }}>
         Last activity:{" "}
         <strong style={{ color: "var(--text-primary)" }}>
-          {ghostMeta.daysSinceLastActivity} days ago
+          {daysSinceLastActivity} days ago
         </strong>
       </p>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-        {ghostMeta.ghostProbability > 25 && (
+        {ghostProbability > 25 && (
           <button type="button" className="primary-btn" onClick={onOpenEmail}>
             Generate Follow-up
           </button>
