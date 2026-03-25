@@ -1,15 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
-import AddApplicationModal from './components/AddApplicationModal';
-import CompanyResearchCard from './components/CompanyResearchCard';
-import Dashboard from './components/Dashboard';
-import EmailModal from './components/EmailModal';
-import InterviewPrepGenerator from './components/InterviewPrepGenerator';
-import SmartTimingAdvisor from './components/SmartTimingAdvisor';
-import Stats from './components/Stats';
-import { useApplications } from './hooks/useApplications';
-import { useGhostDetection } from './hooks/useGhostDetection';
-import { generateFollowUpEmail } from './services/openai';
-import { baseStyles } from './styles/theme';
+import { useEffect, useMemo, useState } from "react";
+import AddApplicationModal from "./components/AddApplicationModal";
+import CompanyResearchCard from "./components/CompanyResearchCard";
+import Dashboard from "./components/Dashboard";
+import EmailModal from "./components/EmailModal";
+import InterviewPrepGenerator from "./components/InterviewPrepGenerator";
+import SmartTimingAdvisor from "./components/SmartTimingAdvisor";
+import Stats from "./components/Stats";
+import { useApplications } from "./hooks/useApplications";
+import { useGhostDetection } from "./hooks/useGhostDetection";
+import { generateFollowUpEmail } from "./services/openai";
+import { baseStyles } from "./styles/theme";
 
 const shellStyles = `
 .app-shell { max-width: 1180px; margin: 0 auto; padding: 2rem 1rem 3rem; }
@@ -50,31 +50,43 @@ const shellStyles = `
 `;
 
 function matchesFilter(app, ghostBand, filter) {
-  if (filter === 'all') return true;
-  if (filter === 'interviewing') return app.status === 'interviewing';
-  if (filter === 'ghosted') return ghostBand === 'ghosted';
-  if (filter === 'cold') return ghostBand === 'cold' || ghostBand === 'warming';
-  if (filter === 'fresh') return ghostBand === 'fresh';
+  if (filter === "all") return true;
+  if (filter === "interviewing") return app.status === "interviewing";
+  if (filter === "ghosted") return ghostBand === "ghosted";
+  if (filter === "cold") return ghostBand === "cold" || ghostBand === "warming";
+  if (filter === "fresh") return ghostBand === "fresh";
   return true;
 }
 
 export default function App() {
-  const { applications, addApplication, updateApplication, deleteApplication } = useApplications();
+  const { applications, addApplication, updateApplication, deleteApplication } =
+    useApplications();
   const { getGhostMeta } = useGhostDetection();
 
-  const [filter, setFilter] = useState('all');
+  const [filter, setFilter] = useState("all");
   const [isAddOpen, setIsAddOpen] = useState(false);
   const [focusedApplicationId, setFocusedApplicationId] = useState(null);
-  const [emailModal, setEmailModal] = useState({ application: null, loading: false, error: '', emailBody: '' });
+  const [emailModal, setEmailModal] = useState({
+    application: null,
+    loading: false,
+    error: "",
+    emailBody: "",
+  });
 
   const ghostMetas = useMemo(
-    () => Object.fromEntries(applications.map((app) => [app.id, getGhostMeta(app)])),
-    [applications, getGhostMeta]
+    () =>
+      Object.fromEntries(
+        applications.map((app) => [app.id, getGhostMeta(app)]),
+      ),
+    [applications, getGhostMeta],
   );
 
   const filteredApps = useMemo(
-    () => applications.filter((app) => matchesFilter(app, ghostMetas[app.id]?.ghostBand, filter)),
-    [applications, filter, ghostMetas]
+    () =>
+      applications.filter((app) =>
+        matchesFilter(app, ghostMetas[app.id]?.ghostBand, filter),
+      ),
+    [applications, filter, ghostMetas],
   );
 
   useEffect(() => {
@@ -89,17 +101,21 @@ export default function App() {
   }, [filteredApps, focusedApplicationId]);
 
   const focusedApplication = useMemo(
-    () => applications.find((app) => app.id === focusedApplicationId) || filteredApps[0] || null,
-    [applications, filteredApps, focusedApplicationId]
+    () =>
+      applications.find((app) => app.id === focusedApplicationId) ||
+      filteredApps[0] ||
+      null,
+    [applications, filteredApps, focusedApplicationId],
   );
 
   const stats = useMemo(() => {
     const values = Object.values(ghostMetas);
     return {
       total: applications.length,
-      interviewing: applications.filter((a) => a.status === 'interviewing').length,
-      fresh: values.filter((v) => v?.ghostBand === 'fresh').length,
-      ghosted: values.filter((v) => v?.ghostBand === 'ghosted').length
+      interviewing: applications.filter((a) => a.status === "interviewing")
+        .length,
+      fresh: values.filter((v) => v?.ghostBand === "fresh").length,
+      ghosted: values.filter((v) => v?.ghostBand === "ghosted").length,
     };
   }, [applications, ghostMetas]);
 
@@ -107,12 +123,19 @@ export default function App() {
     const application = emailModal.application;
     if (!application) return;
 
-    setEmailModal((prev) => ({ ...prev, loading: true, error: '' }));
+    setEmailModal((prev) => ({ ...prev, loading: true, error: "" }));
     try {
-      const body = await generateFollowUpEmail(application, ghostMetas[application.id]);
+      const body = await generateFollowUpEmail(
+        application,
+        ghostMetas[application.id],
+      );
       setEmailModal((prev) => ({ ...prev, emailBody: body, loading: false }));
     } catch (error) {
-      setEmailModal((prev) => ({ ...prev, loading: false, error: error.message }));
+      setEmailModal((prev) => ({
+        ...prev,
+        loading: false,
+        error: error.message,
+      }));
     }
   };
 
@@ -123,16 +146,28 @@ export default function App() {
         <header className="brand">
           <div>
             <h1>Ghosted 👻</h1>
-            <p>Track applications, spot ghosting early, and ship the right follow-up at the right time.</p>
-            <p>Track applications, spot ghosting early, and send polished follow-ups.</p>
+            <p>
+              Track applications, spot ghosting early, and ship the right
+              follow-up at the right time.
+            </p>
+            <p>
+              Track applications, spot ghosting early, and send polished
+              follow-ups.
+            </p>
           </div>
-          <button type="button" className="primary-btn" onClick={() => setIsAddOpen(true)}>+ Add Application</button>
+          <button
+            type="button"
+            className="primary-btn"
+            onClick={() => setIsAddOpen(true)}
+          >
+            + Add Application
+          </button>
         </header>
 
         <Stats stats={stats} />
 
-        <div style={{ marginTop: '1rem' }} className="dashboard-grid">
-        <div style={{ marginTop: '1rem' }}>
+        <div style={{ marginTop: "1rem" }} className="dashboard-grid" />
+        <div style={{ marginTop: "1rem" }}>
           <Dashboard
             applications={filteredApps}
             ghostMetas={ghostMetas}
@@ -140,28 +175,61 @@ export default function App() {
             focusedApplicationId={focusedApplication?.id}
             onFilterChange={setFilter}
             onFocus={setFocusedApplicationId}
-            onFilterChange={setFilter}
-            onOpenEmail={(application) => setEmailModal({ application, loading: false, error: '', emailBody: '' })}
-            onStatusChange={(id, status) => updateApplication(id, { status, lastActivityDate: new Date().toISOString().slice(0, 10) })}
+            onOpenEmail={(application) =>
+              setEmailModal({
+                application,
+                loading: false,
+                error: "",
+                emailBody: "",
+              })
+            }
+            onStatusChange={(id, status) =>
+              updateApplication(id, {
+                status,
+                lastActivityDate: new Date().toISOString().slice(0, 10),
+              })
+            }
             onDelete={deleteApplication}
           />
 
           <aside className="side-rail">
             <CompanyResearchCard application={focusedApplication} />
-            <SmartTimingAdvisor application={focusedApplication} ghostMeta={focusedApplication ? ghostMetas[focusedApplication.id] : null} />
-            <InterviewPrepGenerator application={focusedApplication} ghostMeta={focusedApplication ? ghostMetas[focusedApplication.id] : null} />
+            <SmartTimingAdvisor
+              application={focusedApplication}
+              ghostMeta={
+                focusedApplication ? ghostMetas[focusedApplication.id] : null
+              }
+            />
+            <InterviewPrepGenerator
+              application={focusedApplication}
+              ghostMeta={
+                focusedApplication ? ghostMetas[focusedApplication.id] : null
+              }
+            />
           </aside>
         </div>
       </main>
 
-      {isAddOpen && <AddApplicationModal onClose={() => setIsAddOpen(false)} onAdd={addApplication} />}
+      {isAddOpen && (
+        <AddApplicationModal
+          onClose={() => setIsAddOpen(false)}
+          onAdd={addApplication}
+        />
+      )}
       {emailModal.application && (
         <EmailModal
           application={emailModal.application}
           emailBody={emailModal.emailBody}
           loading={emailModal.loading}
           error={emailModal.error}
-          onClose={() => setEmailModal({ application: null, loading: false, error: '', emailBody: '' })}
+          onClose={() =>
+            setEmailModal({
+              application: null,
+              loading: false,
+              error: "",
+              emailBody: "",
+            })
+          }
           onGenerate={handleGenerateEmail}
         />
       )}

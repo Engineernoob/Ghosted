@@ -1,39 +1,42 @@
-import { useCallback, useEffect, useState } from 'react';
-import { makeId } from '../utils/id';
+import { useCallback, useEffect, useState } from "react";
+import { makeId } from "../utils/id";
 
-const STORAGE_KEY = 'ghosted.applications.v1';
-
-const buildSeedData = () => [
-  {
-    id: makeId(),
-
-const STORAGE_KEY = 'ghosted.applications.v1';
+const STORAGE_KEY = "ghosted.applications.v1";
 
 const seedData = [
   {
     id: crypto.randomUUID(),
-    company: 'Vercel',
-    companyDomain: 'vercel.com',
-    role: 'Frontend Engineer Intern',
-    dateApplied: new Date(Date.now() - 12 * 86400000).toISOString().slice(0, 10),
-    lastActivityDate: new Date(Date.now() - 8 * 86400000).toISOString().slice(0, 10),
-    status: 'applied',
-    notes: 'Applied with referral from campus hackathon mentor.',
-    recruiterContact: 'recruiting@vercel.com'
+    company: "Vercel",
+    companyDomain: "vercel.com",
+    role: "Frontend Engineer Intern",
+    dateApplied: new Date(Date.now() - 12 * 86400000)
+      .toISOString()
+      .slice(0, 10),
+    lastActivityDate: new Date(Date.now() - 8 * 86400000)
+      .toISOString()
+      .slice(0, 10),
+    status: "applied",
+    notes: "Applied with referral from campus hackathon mentor.",
+    recruiterContact: "recruiting@vercel.com",
   },
   {
-    id: makeId(),
     id: crypto.randomUUID(),
-    company: 'Stripe',
-    companyDomain: 'stripe.com',
-    role: 'Software Engineer New Grad',
-    dateApplied: new Date(Date.now() - 20 * 86400000).toISOString().slice(0, 10),
-    lastActivityDate: new Date(Date.now() - 15 * 86400000).toISOString().slice(0, 10),
-    status: 'interviewing',
-    notes: 'Completed recruiter screen. Waiting for onsite schedule.',
-    recruiterContact: 'alex@stripe.com'
-  }
+    company: "Stripe",
+    companyDomain: "stripe.com",
+    role: "Software Engineer New Grad",
+    dateApplied: new Date(Date.now() - 20 * 86400000)
+      .toISOString()
+      .slice(0, 10),
+    lastActivityDate: new Date(Date.now() - 15 * 86400000)
+      .toISOString()
+      .slice(0, 10),
+    status: "interviewing",
+    notes: "Completed recruiter screen. Waiting for onsite schedule.",
+    recruiterContact: "alex@stripe.com",
+  },
 ];
+
+const buildSeedData = () => seedData;
 
 export function useApplications() {
   const [applications, setApplications] = useState([]);
@@ -56,20 +59,6 @@ export function useApplications() {
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
-    } catch {
-      // storage quota/full privacy mode can block writes; keep app usable
-    }
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setApplications(JSON.parse(saved));
-    } else {
-      setApplications(seedData);
-    }
-  }, []);
-
-  useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
   }, [applications]);
 
@@ -77,15 +66,16 @@ export function useApplications() {
     setApplications((prev) => [
       {
         ...application,
-        id: makeId()
-        id: crypto.randomUUID()
+        id: crypto.randomUUID(),
       },
-      ...prev
+      ...prev,
     ]);
   }, []);
 
   const updateApplication = useCallback((id, updates) => {
-    setApplications((prev) => prev.map((app) => (app.id === id ? { ...app, ...updates } : app)));
+    setApplications((prev) =>
+      prev.map((app) => (app.id === id ? { ...app, ...updates } : app)),
+    );
   }, []);
 
   const deleteApplication = useCallback((id) => {
@@ -96,6 +86,6 @@ export function useApplications() {
     applications,
     addApplication,
     updateApplication,
-    deleteApplication
+    deleteApplication,
   };
 }

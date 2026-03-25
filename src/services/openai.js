@@ -22,77 +22,66 @@ Generate a concise prep brief for a student. Include:
 Keep output under 350 words.`;
 
 const getToneHint = (ghostProbability) => {
-  if (ghostProbability < 25) return 'Enthusiastic check-in';
-  if (ghostProbability < 50) return 'Polite inquiry';
-  if (ghostProbability < 80) return 'Direct but professional';
-  return 'Final attempt, graceful';
+  if (ghostProbability < 25) return "Enthusiastic check-in";
+  if (ghostProbability < 50) return "Polite inquiry";
+  if (ghostProbability < 80) return "Direct but professional";
+  return "Final attempt, graceful";
 };
 
 async function chat(messages, temperature = 0.7) {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   if (!apiKey) {
-    throw new Error('Missing VITE_OPENAI_API_KEY. Add it to your .env file to enable AI features.');
+    throw new Error(
+      "Missing VITE_OPENAI_API_KEY. Add it to your .env file to enable AI features.",
+    );
   }
 
-export async function generateFollowUpEmail(application, ghostMeta) {
-  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-  if (!apiKey) {
-    throw new Error('Missing VITE_OPENAI_API_KEY. Add it to your .env file to enable AI email generation.');
-  }
-
-  const userPrompt = `Context:\n- Company: ${application.company}\n- Role: ${application.role}\n- Days since applied: ${ghostMeta.daysSinceApplied}\n- Days since last activity: ${ghostMeta.daysSinceLastActivity}\n- Current status: ${application.status}\n- Notes: ${application.notes || 'N/A'}\n- Preferred tone: ${getToneHint(ghostMeta.ghostProbability)}`;
-
-  const response = await fetch('https://api.openai.com/v1/chat/completions', {
-    method: 'POST',
+  const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${apiKey}`
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
     },
     body: JSON.stringify({
-      model: 'gpt-4o-mini',
-      messages,
-      max_tokens: 400,
-      temperature
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        { role: 'user', content: userPrompt }
-      ],
+      model: "gpt-4o-mini",
+      messages: messages,
       max_tokens: 300,
-      temperature: 0.7
-    })
+      temperature: temperature,
+    }),
   });
 
   if (!response.ok) {
-    throw new Error('OpenAI request failed. Check API key and quota.');
+    throw new Error("OpenAI request failed. Check API key and quota.");
   }
 
   const data = await response.json();
-  return data.choices?.[0]?.message?.content?.trim() || 'Unable to generate content right now.';
+  return (
+    data.choices?.[0]?.message?.content?.trim() ||
+    "Unable to generate content right now."
+  );
 }
 
 export async function generateFollowUpEmail(application, ghostMeta) {
-  const userPrompt = `Context:\n- Company: ${application.company}\n- Role: ${application.role}\n- Days since applied: ${ghostMeta.daysSinceApplied}\n- Days since last activity: ${ghostMeta.daysSinceLastActivity}\n- Current status: ${application.status}\n- Notes: ${application.notes || 'N/A'}\n- Preferred tone: ${getToneHint(ghostMeta.ghostProbability)}`;
+  const userPrompt = `Context:\n- Company: ${application.company}\n- Role: ${application.role}\n- Days since applied: ${ghostMeta.daysSinceApplied}\n- Days since last activity: ${ghostMeta.daysSinceLastActivity}\n- Current status: ${application.status}\n- Notes: ${application.notes || "N/A"}\n- Preferred tone: ${getToneHint(ghostMeta.ghostProbability)}`;
 
   return chat(
     [
-      { role: 'system', content: SYSTEM_PROMPT },
-      { role: 'user', content: userPrompt }
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
     ],
-    0.7
+    0.7,
   );
 }
 
 export async function generateInterviewPrep(application, ghostMeta) {
-  const prompt = `Company: ${application.company}\nRole: ${application.role}\nStatus: ${application.status}\nDays since activity: ${ghostMeta?.daysSinceLastActivity ?? 'unknown'}\nCandidate notes: ${application.notes || 'N/A'}`;
+  const prompt = `Company: ${application.company}\nRole: ${application.role}\nStatus: ${application.status}\nDays since activity: ${ghostMeta?.daysSinceLastActivity ?? "unknown"}\nCandidate notes: ${application.notes || "N/A"}`;
 
   return chat(
     [
-      { role: 'system', content: INTERVIEW_PREP_SYSTEM_PROMPT },
-      { role: 'user', content: prompt }
+      { role: "system", content: INTERVIEW_PREP_SYSTEM_PROMPT },
+      { role: "user", content: prompt },
     ],
-    0.6
+    0.6,
   );
-  return data.choices?.[0]?.message?.content?.trim() || 'Unable to generate email right now.';
 }
