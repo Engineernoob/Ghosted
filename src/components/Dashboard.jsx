@@ -11,6 +11,7 @@ export default function Dashboard({
   onStatusChange,
   onDelete
 }) {
+export default function Dashboard({ applications, ghostMetas, filter, onFilterChange, onOpenEmail, onStatusChange, onDelete }) {
   return (
     <section>
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
