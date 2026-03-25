@@ -1,4 +1,11 @@
 import { useCallback, useEffect, useState } from 'react';
+import { makeId } from '../utils/id';
+
+const STORAGE_KEY = 'ghosted.applications.v1';
+
+const buildSeedData = () => [
+  {
+    id: makeId(),
 
 const STORAGE_KEY = 'ghosted.applications.v1';
 
@@ -15,6 +22,7 @@ const seedData = [
     recruiterContact: 'recruiting@vercel.com'
   },
   {
+    id: makeId(),
     id: crypto.randomUUID(),
     company: 'Stripe',
     companyDomain: 'stripe.com',
@@ -31,6 +39,28 @@ export function useApplications() {
   const [applications, setApplications] = useState([]);
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) {
+          setApplications(parsed);
+          return;
+        }
+      }
+    } catch {
+      // ignore malformed storage and fall back to seed data
+    }
+
+    setApplications(buildSeedData());
+  }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(applications));
+    } catch {
+      // storage quota/full privacy mode can block writes; keep app usable
+    }
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       setApplications(JSON.parse(saved));
@@ -47,6 +77,7 @@ export function useApplications() {
     setApplications((prev) => [
       {
         ...application,
+        id: makeId()
         id: crypto.randomUUID()
       },
       ...prev

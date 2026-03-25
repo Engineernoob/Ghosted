@@ -27,6 +27,26 @@ export default function Dashboard({ applications, ghostMetas, filter, onFilterCh
         ))}
       </div>
 
+      {!applications.length ? (
+        <div style={{ background: 'var(--surface)', border: '1px dashed var(--border)', borderRadius: 14, padding: '1rem', color: 'var(--text-secondary)' }}>
+          No applications match this filter yet. Add one to start tracking ghost risk.
+        </div>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 12 }}>
+          {applications.map((application) => (
+            <ApplicationCard
+              key={application.id}
+              application={application}
+              ghostMeta={ghostMetas[application.id]}
+              isActive={focusedApplicationId === application.id}
+              onSelect={() => onFocus(application.id)}
+              onOpenEmail={() => onOpenEmail(application)}
+              onStatusChange={(status) => onStatusChange(application.id, status)}
+              onDelete={() => onDelete(application.id)}
+            />
+          ))}
+        </div>
+      )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: 12 }}>
         {applications.map((application) => (
           <ApplicationCard
