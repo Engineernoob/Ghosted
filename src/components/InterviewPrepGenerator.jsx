@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { generateInterviewPrep } from "../services/openai";
 
 const cardStyle = {
