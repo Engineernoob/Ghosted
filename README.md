@@ -31,7 +31,6 @@ VITE_OPENAI_API_KEY=your_openai_api_key
 ```
 
 If missing, AI actions will show a helpful error when triggered.
-If missing, the app will show a helpful error when you try to generate an email.
 
 ## Project Structure
 
@@ -39,6 +38,4 @@ If missing, the app will show a helpful error when you try to generate an email.
 - `src/hooks/useGhostDetection.js` — ghost probability logic
 - `src/services/openai.js` — OpenAI integration for follow-up + prep generation
 - `src/components/*` — dashboard, cards, advisor, and modal UI components
-- `src/services/openai.js` — OpenAI integration
-- `src/components/*` — dashboard and modal UI components
 - `src/styles/theme.js` — CSS variables and theme constants
