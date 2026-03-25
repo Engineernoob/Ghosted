@@ -1,3 +1,5 @@
+import React from "react";
+
 const urgencyColor = {
   low: "var(--fresh)",
   medium: "var(--warming)",

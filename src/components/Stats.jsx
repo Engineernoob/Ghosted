@@ -1,3 +1,5 @@
+import React from "react";
+
 const cardStyle = {
   background: "var(--surface)",
   border: "1px solid var(--border)",
